@@ -22,6 +22,7 @@ const run = (name: string, options?: RehypeSectionizeOptions) => {
   );
 
   const output = toHtml(
+    // @ts-expect-error
     planeProcessor.runSync(
       planeProcessor.parse(readSync(`./tests/fixtures/${name}/output.html`)),
     ),

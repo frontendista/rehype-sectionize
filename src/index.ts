@@ -1,6 +1,7 @@
 import { Plugin } from "unified";
 import { headingRank } from "hast-util-heading-rank";
 import { heading } from "hast-util-heading";
+
 import type { Element, Root, RootContent } from "hast";
 import type { Properties } from "hastscript";
 
@@ -25,12 +26,13 @@ const wrappingRank = (
   if (
     rootContent == null ||
     rankPropertyName == null ||
-    !("properties" in rootContent)
+    !("data" in rootContent)
   ) {
     throw new Error("rootContent and rankPropertyName must have value");
   }
 
-  const rank = rootContent.properties?.[rankPropertyName];
+  // @ts-expect-error
+  const rank = rootContent.data?.[rankPropertyName];
   if (typeof rank !== "number") {
     throw new Error(`rankPropertyName(${rankPropertyName}) must be number`);
   }
@@ -59,11 +61,16 @@ const createElement = (
   }
 
   const id = children.at(0)?.properties?.id;
+
+  delete children.at(0)?.properties?.id;
+
   const element: Element = {
     type: "element",
     tagName: "section",
     properties: {
-      className: ["heading"],
+      id
+    },
+    data: {
       ...(rankPropertyName ? { [rankPropertyName]: rank } : {}),
       ...(idPropertyName && typeof id === "string"
         ? { [idPropertyName]: id }
@@ -105,6 +112,7 @@ const sectionize: Plugin<[RehypeSectionizeOptions?], Root> = (
     for (const rootContent of root.children) {
       if (heading(rootContent)) {
         const rank = headingRank(rootContent);
+
         if (rank == null) {
           throw new Error("heading or headingRank is not working");
         }

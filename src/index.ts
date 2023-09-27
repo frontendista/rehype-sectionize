@@ -60,9 +60,15 @@ const createElement = (
     );
   }
 
-  const id = children.at(0)?.properties?.id;
+  const heading = children.at(0);
+  const id = heading?.properties.id;
 
-  delete children.at(0)?.properties?.id;
+  if (heading) {
+    delete heading.properties?.id;
+
+    heading.properties.href = `#${id}`;
+    heading.properties.as = heading.tagName;
+  }
 
   const element: Element = {
     type: "element",
